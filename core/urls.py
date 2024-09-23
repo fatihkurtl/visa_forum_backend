@@ -15,8 +15,14 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+
+admin.site.site_header = "Vize Forum Admin Paneli"
+admin.site.site_title = "Vize Forum Admin Paneli"
+admin.site.index_title = "Vize Forum Admin Paneline Hoşgeldiniz"
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    path("admin/", admin.site.urls),    
+    path("api-auth/", include("rest_framework.urls"), name="rest_framework"),
+    path('api/', include('members.urls')),
 ]
