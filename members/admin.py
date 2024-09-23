@@ -10,15 +10,15 @@ class MemberRoleInline(admin.StackedInline):
 class MemberAdmin(admin.ModelAdmin):
     list_display = (
         'firstname', 'lastname', 'username', 'email',
-        'is_active', 'email_verified', 'created_at', 'updated_at', 'profile_image_preview'
+        'country_of_interest', 'is_active', 'email_verified', 'created_at', 'updated_at', 'profile_image_preview'
     )
     search_fields = ('firstname', 'lastname', 'username', 'email')
-    list_filter = ('is_active', 'email_verified')
+    list_filter = ('is_active', 'email_verified', 'memberrole__role')
     inlines = [MemberRoleInline]
 
     fieldsets = (
         (None, {
-            'fields': ('firstname', 'lastname', 'username', 'email', 'profile_image', 'password', 'bio', 'expertise', 'email_notifications', 'is_active')
+            'fields': ('firstname', 'lastname', 'username', 'email', 'profile_image', 'password', 'bio', 'expertise', 'email_notifications', 'is_active', 'country_of_interest')  # country_of_interest eklendi
         }),
         ('Permissions', {
             'fields': ('email_verified',)

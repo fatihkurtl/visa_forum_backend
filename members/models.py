@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import check_password
 from django.utils import timezone
 from datetime import timedelta
 
@@ -13,6 +14,7 @@ class Member(models.Model):
     email_verified = models.BooleanField(default=False, verbose_name='E-posta doğrulandı mı?')
     is_active = models.BooleanField(default=True, verbose_name='Aktif mi?')
     
+    country_of_interest = models.CharField(max_length=100, null=True, blank=True, verbose_name='İlgilenilen ülke')
     bio = models.TextField(null=True, blank=True, verbose_name='Biyografi')
     email_notifications = models.BooleanField(default=True, verbose_name='E-posta bilgilendirmeleri')
     expertise = models.CharField(max_length=100, null=True, blank=True, verbose_name='Uzmanlık Alanı')
@@ -36,17 +38,19 @@ class Member(models.Model):
         return f'{self.firstname} {self.lastname} - {self.username} ({self.email})'
     
     def save(self, *args, **kwargs):
-        if self.password:
-            self.password = make_password(self.password)
         super().save(*args, **kwargs)
         if not hasattr(self, 'memberrole'):
             MemberRole.objects.create(member=self, role=MemberRole.Roles.MEMBER)
+    
+    def check_password(self, raw_password):
+        """Verilen şifreyi kontrol et."""
+        return check_password(raw_password, self.password)
 
 
 class MemberRole(models.Model):
     class Roles(models.TextChoices):
         ADMIN = 'admin', 'Admin'
-        MODERATOR = 'moderator', 'Moderator'
+        MODERATOR = 'moderator', 'Moderatör'
         MEMBER = 'member', 'Üye'
 
     member = models.OneToOneField(Member, on_delete=models.CASCADE, verbose_name='Üye', related_name='memberrole')

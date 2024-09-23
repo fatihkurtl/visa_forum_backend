@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from .models import Member, MemberRole, Token
 from django.contrib.auth import authenticate
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import check_password
 import uuid
 
 class MemberRoleSerializer(serializers.ModelSerializer):
@@ -11,11 +13,11 @@ class MemberRoleSerializer(serializers.ModelSerializer):
 class MemberTokenSerializer(serializers.ModelSerializer):
     class Meta:
         model = Token
-        fields = ['token', 'expires_at']  # Token ve geçerlilik süresi
+        fields = ['token', 'expires_at']
 
 class MemberSerializer(serializers.ModelSerializer):
     roles = MemberRoleSerializer(source='memberrole', read_only=True)
-    tokens = serializers.SerializerMethodField()  # Token'ları almak için özel bir alan
+    tokens = serializers.SerializerMethodField()
 
     class Meta:
         model = Member
@@ -23,31 +25,64 @@ class MemberSerializer(serializers.ModelSerializer):
 
     def get_tokens(self, obj):
         """Member için mevcut token'ları döndür."""
-        tokens = obj.tokens.all()  # Tüm token'ları al
-        return MemberTokenSerializer(tokens, many=True).data  # Token'ları serialize et
+        tokens = obj.tokens.all()
+        return MemberTokenSerializer(tokens, many=True).data
+
+
+class RegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = Member
+        fields = ['firstname', 'lastname', 'username', 'email', 'password', 'country_of_interest']
+
+    def validate_email(self, value):
+        """E-posta adresinin benzersiz olduğunu kontrol et."""
+        if Member.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Bu e-posta adresi zaten kullanılıyor.")
+        return value
+
+    def validate_username(self, value):
+        """Kullanıcı adının benzersiz olduğunu kontrol et."""
+        if Member.objects.filter(username=value).exists():
+            raise serializers.ValidationError("Bu kullanıcı adı zaten kullanılıyor.")
+        return value
+
+    def create(self, validated_data):
+        """Yeni bir kullanıcı oluştur."""
+        validated_data['password'] = make_password(validated_data['password'])
+        return super().create(validated_data)
+
 
 class LoginSerializer(serializers.Serializer):
-    identifier = serializers.CharField()  # Kullanıcı adı veya e-posta
+    identifier = serializers.CharField()
     password = serializers.CharField()
 
     def validate(self, attrs):
         identifier = attrs.get('identifier')
         password = attrs.get('password')
-
-        # Kullanıcıyı doğrula (kullanıcı adı veya e-posta ile)
         user = None
-        if '@' in identifier:  # E-posta kontrolü
-            user = Member.get_by_email(identifier)  # E-posta ile kullanıcıyı al
-        else:  # Kullanıcı adı ile doğrulama
-            user = authenticate(username=identifier, password=password)
 
-        if user is None or not user.check_password(password):
+        if '@' in identifier:
+            user = Member.get_by_email(identifier)
+        else:
+            user = Member.objects.filter(username=identifier).first()
+
+        if user is None:
+            raise serializers.ValidationError("Geçersiz kullanıcı adı/e-posta veya şifre.")
+
+        # Şifre kontrolü
+        if not check_password(password, user.password):
+            print(f"Hashlenmiş Şifre: {user.password}")  # Hashlenmiş şifreyi yazdır
+            print(f"Girilen Şifre: {password}")  # Girilen şifreyi yazdır
+            is_correct = check_password('123456', user.password)  # Girdiğiniz şifreyi kontrol edin
+            print(is_correct)
             raise serializers.ValidationError("Geçersiz kullanıcı adı/e-posta veya şifre.")
 
         # Token oluştur
         token, created = Token.objects.get_or_create(member=user)
         if created:
-            token.token = str(uuid.uuid4())  # Benzersiz bir token oluştur
+            token.token = str(uuid.uuid4())
             token.save()
 
         return {
