@@ -71,15 +71,9 @@ class LoginSerializer(serializers.Serializer):
         if user is None:
             raise serializers.ValidationError("Geçersiz kullanıcı adı/e-posta veya şifre.")
 
-        # Şifre kontrolü
         if not check_password(password, user.password):
-            print(f"Hashlenmiş Şifre: {user.password}")  # Hashlenmiş şifreyi yazdır
-            print(f"Girilen Şifre: {password}")  # Girilen şifreyi yazdır
-            is_correct = check_password('123456', user.password)  # Girdiğiniz şifreyi kontrol edin
-            print(is_correct)
             raise serializers.ValidationError("Geçersiz kullanıcı adı/e-posta veya şifre.")
 
-        # Token oluştur
         token, created = Token.objects.get_or_create(member=user)
         if created:
             token.token = str(uuid.uuid4())
