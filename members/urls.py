@@ -5,3 +5,5 @@ from .views import MemberView
 urlpatterns = [
     path('member/register', MemberView.as_view(), name='member-register'),
 ]
+
+urlpatterns = format_suffix_patterns(urlpatterns)

@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.hashers import make_password
+from django.utils import timezone
+from datetime import timedelta
 
 class Member(models.Model):
     firstname = models.CharField(max_length=100, null=False, blank=False, verbose_name='Ad')
@@ -22,6 +24,13 @@ class Member(models.Model):
         db_table = 'members'
         verbose_name = 'Üye'
         verbose_name_plural = 'Üyeler'
+    
+    @classmethod
+    def get_by_email(cls, email):
+        try:
+            return cls.objects.get(email=email)
+        except cls.DoesNotExist:
+            return None
         
     def __str__(self):
         return f'{self.firstname} {self.lastname} - {self.username} ({self.email})'
@@ -30,7 +39,7 @@ class Member(models.Model):
         if self.password:
             self.password = make_password(self.password)
         super().save(*args, **kwargs)
-        if not self.memberrole_set.exists():
+        if not hasattr(self, 'memberrole'):
             MemberRole.objects.create(member=self, role=MemberRole.Roles.MEMBER)
 
 
@@ -38,9 +47,9 @@ class MemberRole(models.Model):
     class Roles(models.TextChoices):
         ADMIN = 'admin', 'Admin'
         MODERATOR = 'moderator', 'Moderator'
-        MEMBER = 'member', 'Member'
+        MEMBER = 'member', 'Üye'
 
-    member = models.ForeignKey(Member, on_delete=models.CASCADE, verbose_name='Üye')
+    member = models.OneToOneField(Member, on_delete=models.CASCADE, verbose_name='Üye', related_name='memberrole')
     role = models.CharField(max_length=100, choices=Roles.choices, verbose_name='Rol')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Rol ekleme tarihi')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Güncelleme tarihi')
@@ -52,3 +61,29 @@ class MemberRole(models.Model):
         
     def __str__(self):
         return f'{self.member.username} - {self.role}'
+    
+    
+    
+class Token(models.Model):
+    member = models.ForeignKey(Member, on_delete=models.CASCADE, verbose_name='Üye', related_name='tokens')
+    token = models.CharField(max_length=255, unique=True, verbose_name='Token')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Oluşturulma Tarihi')
+    expires_at = models.DateTimeField(verbose_name='Son Geçerlilik Tarihi')
+
+    class Meta:
+        db_table = 'member_tokens'
+        verbose_name = 'Üye Tokeni'
+        verbose_name_plural = 'Üye Tokenleri'
+
+    def __str__(self):
+        return f'Token for {self.member.username} - Expires at {self.expires_at}'
+
+    def is_expired(self):
+        """Token'ın süresinin dolup dolmadığını kontrol et."""
+        return timezone.now() > self.expires_at
+
+    def save(self, *args, **kwargs):
+        """Token oluşturulurken geçerlilik süresini ayarla."""
+        if not self.expires_at:
+            self.expires_at = timezone.now() + timedelta(days=1)
+        super().save(*args, **kwargs)
