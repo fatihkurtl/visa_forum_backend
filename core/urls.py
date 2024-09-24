@@ -10,7 +10,8 @@ admin.site.index_title = "Vize Forum Admin Paneline Hoşgeldiniz"
 urlpatterns = [
     path("admin/", admin.site.urls),    
     path("api-auth/", include("rest_framework.urls"), name="rest_framework"),
-    path('api/member/', include('members.urls')),
+    path("api/member/", include("members.urls")),
+    path("api/threads/", include("threads.urls")),
 ]
 
 if settings.DEBUG:

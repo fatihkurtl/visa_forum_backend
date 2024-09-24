@@ -71,6 +71,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "django_cleanup.apps.CleanupConfig",
     "members.apps.MembersConfig",
+    "threads.apps.ThreadsConfig",
 ]
 
 REST_FRAMEWORK = {
