@@ -30,6 +30,8 @@ class Thread(models.Model):
     likes = models.ManyToManyField('members.Member', blank=True, related_name='thread_likes', verbose_name='Beğeniler')
     is_active = models.BooleanField(default=True, verbose_name='Aktif mi?')
     
+    comments = models.ManyToManyField('Comments', blank=True, related_name='thread_comments', verbose_name='Yorumlar')
+    
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Yayın tarihi')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Güncelleme tarihi')
     
@@ -48,7 +50,7 @@ class Comments(models.Model):
     likes = models.ManyToManyField('members.Member', blank=True, related_name='comment_likes', verbose_name='Beğeniler')
     replies = models.ForeignKey('Replies', blank=True, null=True, on_delete=models.CASCADE, related_name='comment_replies', verbose_name='Cevaplar')
     
-    thread = models.ForeignKey(Thread, on_delete=models.CASCADE, verbose_name='Konu')
+    thread = models.ForeignKey(Thread, on_delete=models.CASCADE, related_name='comment_threads', verbose_name='Konu')
     author = models.ForeignKey('members.Member', on_delete=models.CASCADE, related_name='comment_author', verbose_name='Yazar')
     
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Yayın tarihi')
