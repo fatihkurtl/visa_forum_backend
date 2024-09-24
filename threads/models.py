@@ -48,7 +48,7 @@ class Comments(models.Model):
     content = models.TextField(null=False, blank=False, verbose_name='İçerik')
     
     likes = models.ManyToManyField('members.Member', blank=True, related_name='comment_likes', verbose_name='Beğeniler')
-    replies = models.ForeignKey('Replies', blank=True, null=True, on_delete=models.CASCADE, related_name='comment_replies', verbose_name='Cevaplar')
+    replies = models.ManyToManyField('Replies', blank=True, null=True, related_name='comment_replies', verbose_name='Cevaplar')
     
     thread = models.ForeignKey(Thread, on_delete=models.CASCADE, related_name='comment_threads', verbose_name='Konu')
     author = models.ForeignKey('members.Member', on_delete=models.CASCADE, related_name='comment_author', verbose_name='Yazar')

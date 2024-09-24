@@ -35,7 +35,7 @@ class Member(models.Model):
             return None
         
     def __str__(self):
-        return f'{self.firstname} {self.lastname} - {self.username} ({self.email})'
+        return f'{self.username}'
     
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)

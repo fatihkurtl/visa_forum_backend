@@ -17,7 +17,7 @@ class ThreadAdmin(admin.ModelAdmin):
     list_display = ('title', 'category', 'author', 'is_active', 'created_at', 'updated_at')
     search_fields = ('title', 'content')
     list_filter = ('category', 'is_active')
-    inlines = [CommentsInline]
+    # inlines = [CommentsInline]
 
 @admin.register(Comments)
 class CommentsAdmin(admin.ModelAdmin):
