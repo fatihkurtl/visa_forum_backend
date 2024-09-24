@@ -14,7 +14,7 @@ class ThreadSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Thread
-        fields = ['id', 'title', 'content', 'category', 'author', 'created_at', 'updated_at']
+        fields = ['id', 'title', 'content', 'category', 'is_active', 'likes', 'author', 'created_at', 'updated_at']
 
 
 class CommentSerializer(serializers.ModelSerializer):

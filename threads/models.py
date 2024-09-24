@@ -27,6 +27,9 @@ class Thread(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name='Kategori')
     author = models.ForeignKey('members.Member', on_delete=models.CASCADE, verbose_name='Yazar')
     
+    likes = models.ManyToManyField('members.Member', blank=True, related_name='thread_likes', verbose_name='Beğeniler')
+    is_active = models.BooleanField(default=True, verbose_name='Aktif mi?')
+    
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Yayın tarihi')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Güncelleme tarihi')
     
