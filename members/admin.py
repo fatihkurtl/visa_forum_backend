@@ -10,7 +10,7 @@ class MemberRoleInline(admin.StackedInline):
 class MemberAdmin(admin.ModelAdmin):
     list_display = (
         'firstname', 'lastname', 'username', 'email',
-        'country_of_interest', 'is_active', 'email_verified', 'created_at', 'updated_at', 'profile_image_preview'
+        'is_active', 'email_verified', 'created_at', 'updated_at', 'profile_image_preview'
     )
     search_fields = ('firstname', 'lastname', 'username', 'email')
     list_filter = ('is_active', 'email_verified', 'memberrole__role')
@@ -18,7 +18,7 @@ class MemberAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (None, {
-            'fields': ('firstname', 'lastname', 'username', 'email', 'profile_image', 'password', 'bio', 'expertise', 'email_notifications', 'is_active', 'country_of_interest')  # country_of_interest eklendi
+            'fields': ('firstname', 'lastname', 'username', 'email', 'profile_image', 'password', 'bio', 'expertise', 'email_notifications', 'is_active', 'terms', 'ip_address')  # country_of_interest eklendi
         }),
         ('Permissions', {
             'fields': ('email_verified',)
@@ -29,7 +29,7 @@ class MemberAdmin(admin.ModelAdmin):
         }),
     )
 
-    readonly_fields = ('created_at', 'updated_at')
+    readonly_fields = ('created_at', 'updated_at', 'ip_address')
 
     def profile_image_preview(self, obj):
         """Profile image preview for admin panel."""

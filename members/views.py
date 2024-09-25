@@ -22,7 +22,9 @@ class MemberView(APIView):
 
 class RegisterView(APIView):
     def post(self, request, format=None):
-        serializer = RegisterSerializer(data=request.data)
+        member_ip = request.META.get('REMOTE_ADDR')
+        print(member_ip)
+        serializer = RegisterSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)

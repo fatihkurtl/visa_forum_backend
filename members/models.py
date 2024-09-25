@@ -11,6 +11,10 @@ class Member(models.Model):
     email = models.EmailField(null=False, blank=False, unique=True, verbose_name='E-posta adresi')
     profile_image = models.ImageField(upload_to='members/profile_images', null=True, blank=True, verbose_name='Profil resmi')
     password = models.CharField(max_length=100, null=False, blank=False, verbose_name='Şifre')
+    terms = models.BooleanField(default=True, verbose_name='Forum kurallarını onayladı mı?')
+    
+    ip_address = models.GenericIPAddressField(null=True, blank=True, verbose_name='IP adresi')
+    
     email_verified = models.BooleanField(default=False, verbose_name='E-posta doğrulandı mı?')
     is_active = models.BooleanField(default=True, verbose_name='Aktif mi?')
     

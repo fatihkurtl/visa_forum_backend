@@ -34,7 +34,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Member
-        fields = ['firstname', 'lastname', 'username', 'email', 'password', 'country_of_interest']
+        fields = ['firstname', 'lastname', 'username', 'email', 'password', 'terms']
 
     def validate_email(self, value):
         """E-posta adresinin benzersiz olduğunu kontrol et."""
@@ -51,6 +51,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         """Yeni bir kullanıcı oluştur."""
         validated_data['password'] = make_password(validated_data['password'])
+        validated_data['ip_address'] = self.context['request'].META.get('REMOTE_ADDR')
         return super().create(validated_data)
 
 
