@@ -15,6 +15,9 @@ class ReplySerializer(serializers.ModelSerializer):
     class Meta:
         model = Replies
         fields = ['id', 'content', 'likes', 'comment', 'author', 'created_at', 'updated_at']
+        
+    def get_likes(self, obj):
+        return obj.likes.count()
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -24,7 +27,10 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comments
-        fields = ['id', 'content', 'likes', 'replies', 'thread', 'author', 'created_at', 'updated_at']
+        fields = ['id', 'content', 'replies', 'thread', 'author', 'created_at', 'updated_at']
+    
+    def get_likes(self, obj):
+        return obj.likes.count()
 
 
 class ThreadSerializer(serializers.ModelSerializer):
@@ -34,7 +40,10 @@ class ThreadSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Thread
-        fields = ['id', 'title', 'content', 'category', 'comments', 'is_active', 'likes', 'author', 'created_at', 'updated_at']
+        fields = ['id', 'title', 'content', 'category', 'comments', 'is_active', 'author', 'created_at', 'updated_at']
+    
+    def get_likes(self, obj):
+        return obj.likes.count()
 
 
 

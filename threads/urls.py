@@ -4,6 +4,7 @@ from . import views
 
 urlpatterns = [
     path('', views.ThreadsView.as_view(), name='thread-list'),
+    path('categories/', views.ThreadsCategoriesView.as_view(), name='thread-categories'),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

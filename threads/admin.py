@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Thread, Comments, Replies
+from .models import Category, Thread, Comments, Replies, Like
 
 class CommentsInline(admin.TabularInline):
     model = Comments
@@ -17,15 +17,15 @@ class ThreadAdmin(admin.ModelAdmin):
     list_display = ('title', 'category', 'author', 'is_active', 'created_at', 'updated_at')
     search_fields = ('title', 'content')
     list_filter = ('category', 'is_active')
-    readonly_fields = ('created_at', 'updated_at', 'comments', 'likes')
-    inlines = [CommentsInline]
+    readonly_fields = ('created_at', 'updated_at', 'comments')
+    # inlines = [CommentsInline]
 
 @admin.register(Comments)
 class CommentsAdmin(admin.ModelAdmin):
     list_display = ('content', 'thread', 'author', 'created_at', 'updated_at')
     search_fields = ('content',)
     list_filter = ('thread', 'author')
-    readonly_fields = ('created_at', 'updated_at', 'replies', 'likes')
+    readonly_fields = ('created_at', 'updated_at', 'replies')
 
 @admin.register(Replies)
 class RepliesAdmin(admin.ModelAdmin):
@@ -33,3 +33,14 @@ class RepliesAdmin(admin.ModelAdmin):
     search_fields = ('content',)
     list_filter = ('comment', 'author')
     readonly_fields = ('created_at', 'updated_at')
+    
+
+@admin.register(Like)
+class LikeAdmin(admin.ModelAdmin):
+    list_display = ('member', 'thread', 'comment', 'reply', 'created_at')
+    search_fields = ('member__username', 'thread__title', 'comment__content', 'reply__content')
+    list_filter = ('thread', 'comment', 'reply', 'member')
+    readonly_fields = ('created_at',)
+
+    def created_at(self, obj):
+        return obj.created_at.strftime("%Y-%m-%d %H:%M:%S")
