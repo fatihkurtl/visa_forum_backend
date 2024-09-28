@@ -14,6 +14,17 @@ class MemberTokenSerializer(serializers.ModelSerializer):
     class Meta:
         model = Token
         fields = ['token', 'expires_at']
+        
+    def check_token(self, token):
+        token = Token.objects.filter(token=token).get()
+        if not token:
+            raise serializers.ValidationError("Geçersiz token.")
+        # if token.expires_at < timezone.now(): ##! asagidaki islemin aynisi
+        #     raise serializers.ValidationError("Token süresi dolmuş.")
+        if token.is_expired(): ##! Token modeli altindaki method
+            raise serializers.ValidationError("Token suresi dolmuş.")
+        return token
+
 
 class MemberSerializer(serializers.ModelSerializer):
     roles = MemberRoleSerializer(source='memberrole', read_only=True)
@@ -21,7 +32,7 @@ class MemberSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Member
-        fields = '__all__'
+        exclude = ['password'] ##! password field'i haric modeldeki her field'i veriyor
 
     def get_tokens(self, obj):
         """Member için mevcut token'ları döndür."""
@@ -64,6 +75,9 @@ class LoginSerializer(serializers.Serializer):
         password = attrs.get('password')
         user = None
 
+        if not identifier or not password:
+            raise serializers.ValidationError("E-posta adresi ve şifre gereklidir.")
+        
         if '@' in identifier:
             user = Member.get_by_email(identifier)
         else:

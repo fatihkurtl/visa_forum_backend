@@ -39,7 +39,7 @@ class Member(models.Model):
             return None
         
     def __str__(self):
-        return f'{self.username}'
+        return self.username
     
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
