@@ -10,6 +10,10 @@ class CategorySerializer(serializers.ModelSerializer):
     def get_threads(self, obj):
         from threads.serializers import ThreadSerializer
         return ThreadSerializer(obj.threads.all(), many=True).data
+    
+    def add_thread(self, obj):
+        from threads.serializers import ThreadSerializer
+        return ThreadSerializer(obj.threads.all(), many=True).data
 
 class ReplySerializer(serializers.ModelSerializer):
     author = serializers.StringRelatedField()
@@ -38,7 +42,7 @@ class ThreadSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Thread
-        fields = ['id', 'title', 'content', 'category', 'author', 'likes_count', 'comments', 'is_active', 'created_at', 'updated_at']
+        fields = ['id', 'title', 'content', 'category', 'views', 'author', 'likes_count', 'comments', 'is_active', 'created_at', 'updated_at']
 
     def get_likes_count(self, obj):
         return obj.likes.count()
@@ -46,7 +50,7 @@ class ThreadSerializer(serializers.ModelSerializer):
 class ThreadCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Thread
-        fields = ['title', 'content', 'category', 'author']
+        fields = ['id', 'title', 'content', 'category', 'author']
 
     def create(self, validated_data):
         return Thread.objects.create(**validated_data)

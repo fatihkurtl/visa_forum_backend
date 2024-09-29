@@ -30,6 +30,7 @@ class Thread(models.Model):
     author = models.ForeignKey('members.Member', on_delete=models.CASCADE, verbose_name='Yazar')
     
     likes = models.ManyToManyField('members.Member', blank=True, through='Like', related_name='thread_likes', verbose_name='Beğeniler')
+    views = models.PositiveIntegerField(default=0, verbose_name='Okunma sayısı')
     is_active = models.BooleanField(default=True, verbose_name='Aktif mi?')
     
     category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name='Kategori')

@@ -43,6 +43,8 @@ class ThreadsCreateView(APIView):
         serializer = ThreadCreateSerializer(data={'title': title, 'content': content, 'category': selected_category.pk, 'author': author.pk})
         if serializer.is_valid():
             serializer.save()
+            save_category = selected_category.threads.add(Thread.objects.get(pk=serializer.data.get('id')))
+            print(save_category)
             return Response({"token": member.token, "expires_at": member.expires_at}, status=status.HTTP_201_CREATED)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

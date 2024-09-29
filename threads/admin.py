@@ -14,7 +14,7 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Thread)
 class ThreadAdmin(admin.ModelAdmin):
-    list_display = ('title', 'category', 'author', 'is_active', 'created_at', 'updated_at')
+    list_display = ('title', 'category', 'views', 'author', 'is_active', 'created_at', 'updated_at')
     search_fields = ('title', 'content')
     readonly_fields = ('likes', 'created_at', 'updated_at') 
     list_filter = ('category', 'is_active')
