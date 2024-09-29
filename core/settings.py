@@ -32,6 +32,7 @@ DEBUG = True
 
 
 ALLOWED_HOSTS = [
+    "127.0.0.1",
     "192.168.1.102",
     "192.168.1.102:3000",
     "localhost",
@@ -41,7 +42,7 @@ ALLOWED_HOSTS = [
 CORS_ALLOWED_ORIGINS = [
     "https://example.com",
     "https://sub.example.com",
-    "http://localhost:8080",
+    "http://127.0.0.1:8000",
     "http://localhost:3000",
     "http://192.168.1.102:3000"
 ]
@@ -83,7 +84,7 @@ INSTALLED_APPS = [
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10
+    'PAGE_SIZE': 5
 }
 
 MIDDLEWARE = [

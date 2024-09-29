@@ -1,6 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.pagination import PageNumberPagination
 from members.models import Member, Token
 from members.serializers import MemberTokenSerializer
 from .models import Category, Comments, Thread
@@ -8,13 +9,14 @@ from .serializers import CategorySerializer, ThreadSerializer, ThreadCreateSeria
 
 
 class ThreadsView(APIView):
+    pagination_class = PageNumberPagination
     def get(self, request, format=None):
-        threads = Thread.objects.all()
-        serializer = ThreadSerializer(threads, many=True)
-        # print(serializer.data[0]["comments"][0]["id"])
-        # commnents = Comments.objects.get(pk=serializer.data[0]["comments"][0]["id"])
-        # print(commnents.content)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        threads = Thread.objects.all().order_by('-created_at')
+        page = self.pagination_class().paginate_queryset(threads, request)
+        if page is not None:
+            serializer = ThreadSerializer(page, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
 class ThreadsCategoriesView(APIView):
