@@ -31,7 +31,11 @@ SECRET_KEY = os.environ.get('SECRET_KEY', get_random_secret_key())
 DEBUG = True
 
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "192.168.1.102",
+    "192.168.1.102:3000",
+    "localhost",
+]
 
 
 CORS_ALLOWED_ORIGINS = [
@@ -39,6 +43,7 @@ CORS_ALLOWED_ORIGINS = [
     "https://sub.example.com",
     "http://localhost:8080",
     "http://localhost:3000",
+    "http://192.168.1.102:3000"
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
