@@ -34,7 +34,7 @@ class Thread(models.Model):
     is_active = models.BooleanField(default=True, verbose_name='Aktif mi?')
     
     category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name='Kategori')
-    comments = models.ManyToManyField('members.Member', blank=True, through='Comments', related_name='thread_comments', verbose_name='Yorumlar')
+    # comments = models.ManyToManyField('members.Member', blank=True, through='Comments', related_name='thread_comments', verbose_name='Yorumlar')
     
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Yayın tarihi')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Güncelleme tarihi')
@@ -50,13 +50,10 @@ class Thread(models.Model):
 
 class Comments(models.Model):
     content = models.TextField(null=False, blank=False, verbose_name='İçerik')
-    
     likes = models.ManyToManyField('members.Member', blank=True, through='Like', related_name='comment_likes', verbose_name='Beğeniler')
-    replies = models.ManyToManyField('members.Member', blank=True, related_name='comment_replies', verbose_name='Cevaplar')
-    
-    thread = models.ForeignKey(Thread, on_delete=models.CASCADE, related_name='threads', verbose_name='Konu')
-    author = models.ForeignKey('members.Member', on_delete=models.CASCADE, related_name='comment_author', verbose_name='Yazar')
-    
+    thread = models.ForeignKey(Thread, on_delete=models.CASCADE, related_name='thread_comments', verbose_name='Konu')
+    replies = models.ManyToManyField('Reply', blank=True, related_name='comment_replies', verbose_name='Yanıtlar')
+    author = models.ForeignKey('members.Member', on_delete=models.CASCADE, related_name='comment_author', verbose_name='Yazar')    
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Yayın tarihi')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Güncelleme tarihi')
     
@@ -64,36 +61,32 @@ class Comments(models.Model):
         db_table = 'comments'
         verbose_name = 'Yorum'
         verbose_name_plural = 'Yorumlar'
-
+            
     def __str__(self):
-        return self.content
-    
+        return f"{self.author.username}: {self.content[:50]}..."
 
-class Replies(models.Model):
+class Reply(models.Model):
     content = models.TextField(null=False, blank=False, verbose_name='İçerik')
-    
     likes = models.ManyToManyField('members.Member', blank=True, through='Like', related_name='reply_likes', verbose_name='Beğeniler')
-    
-    comment = models.ForeignKey(Comments, on_delete=models.CASCADE, related_name='reply_comments', verbose_name='Yorum')
+    comment = models.ForeignKey(Comments, on_delete=models.CASCADE, null=True, blank=True, related_name='reply_set', verbose_name='Yorum')
     author = models.ForeignKey('members.Member', on_delete=models.CASCADE, related_name='reply_author', verbose_name='Yazar')
-    
+    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='children', verbose_name='Üst Yanıt')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Yayın tarihi')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Güncelleme tarihi')
     
     class Meta:
         db_table = 'replies'
-        verbose_name = 'Cevap'
-        verbose_name_plural = 'Cevaplar'
-
+        verbose_name = 'Yanıt'
+        verbose_name_plural = 'Yanıtlar'
+            
     def __str__(self):
-        return self.author.username
-    
+        return f"{self.author.username}: {self.content[:50]}..."
 
 class Like(models.Model):
     member = models.ForeignKey(Member, on_delete=models.CASCADE, verbose_name='Üye')
     thread = models.ForeignKey('Thread', null=True, blank=True, on_delete=models.CASCADE, verbose_name='Konu')
     comment = models.ForeignKey('Comments', null=True, blank=True, on_delete=models.CASCADE, verbose_name='Yorum')
-    reply = models.ForeignKey('Replies', null=True, blank=True, on_delete=models.CASCADE, verbose_name='Cevap')
+    reply = models.ForeignKey('Reply', null=True, blank=True, on_delete=models.CASCADE, verbose_name='Yanıt')
     
     created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True, verbose_name='Beğenme tarihi')
     updated_at = models.DateTimeField(auto_now=True, blank=True, null=True, verbose_name='Güncelleme tarihi')
@@ -102,7 +95,7 @@ class Like(models.Model):
         db_table = 'likes'
         verbose_name = 'Beğeni'
         verbose_name_plural = 'Beğeniler'
-        unique_together = ('member', 'thread', 'comment', 'reply')  # Bir üyenin aynı konu, yorum veya cevap için sadece bir beğenisi olabilir.
+        unique_together = ('member', 'thread', 'comment', 'reply')
 
     def __str__(self):
         return f"{self.member} liked {self.thread or self.comment or self.reply}"

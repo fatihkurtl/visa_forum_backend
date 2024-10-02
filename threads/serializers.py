@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Category, Thread, Comments, Replies, Member
+from .models import Category, Reply, Thread, Comments, Member
 
 class CategorySerializer(serializers.ModelSerializer):
     threads = serializers.SerializerMethodField()
@@ -17,35 +17,55 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class ReplySerializer(serializers.ModelSerializer):
     author = serializers.StringRelatedField()
-    
+    likes_count = serializers.SerializerMethodField()
+    children = serializers.SerializerMethodField()
+
     class Meta:
-        model = Replies
-        fields = ['id', 'content', 'author', 'likes', 'created_at', 'updated_at']
+        model = Reply
+        fields = ['id', 'content', 'likes_count', 'author', 'created_at', 'updated_at', 'parent', 'children']
+
+    def get_likes_count(self, obj):
+        return obj.likes.count()
+
+    def get_children(self, obj):
+        children = obj.children.all()
+        return ReplySerializer(children, many=True).data
 
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.StringRelatedField()
-    replies = ReplySerializer(many=True, read_only=True, source='reply_comments')
+    thread = serializers.SerializerMethodField()
+    replies = serializers.SerializerMethodField()
     likes_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Comments
-        fields = ['id', 'content', 'likes_count', 'replies', 'author', 'created_at', 'updated_at']
+        fields = ['thread', 'id', 'content', 'likes_count', 'author', 'created_at', 'updated_at', 'replies']
 
     def get_likes_count(self, obj):
         return obj.likes.count()
+    
+    def get_thread(self, obj):
+        return obj.thread.id if obj.thread else None
+
+    def get_replies(self, obj):
+        top_level_replies = obj.reply_set.filter(parent=None)
+        return ReplySerializer(top_level_replies, many=True).data
 
 class ThreadSerializer(serializers.ModelSerializer):
     category = serializers.StringRelatedField()
     author = serializers.StringRelatedField()
-    comments = CommentSerializer(many=True, read_only=True, source='threads')
+    comments = CommentSerializer(many=True, read_only=True, source='thread_comments')
     likes_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Thread
-        fields = ['id', 'title', 'content', 'category', 'views', 'author', 'likes_count', 'comments', 'is_active', 'created_at', 'updated_at']
+        fields = ['id', 'title', 'content', 'category', 'views', 'author', 'likes_count', 'is_active', 'created_at', 'updated_at', 'comments']
 
     def get_likes_count(self, obj):
         return obj.likes.count()
+
+    def get_author(self, obj):
+        return obj.author
 
 class ThreadCreateSerializer(serializers.ModelSerializer):
     class Meta:

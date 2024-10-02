@@ -1,8 +1,14 @@
 from django.contrib import admin
-from .models import Category, Thread, Comments, Replies, Like
+from .models import Category, Thread, Comments, Like, Reply
 
 class CommentsInline(admin.TabularInline):
     model = Comments
+    extra = 0
+    fields = ('content', 'author', 'created_at')
+    readonly_fields = ('created_at', 'content', 'author')
+
+class ReplyInline(admin.TabularInline):
+    model = Reply
     extra = 0
     fields = ('content', 'author', 'created_at')
     readonly_fields = ('created_at', 'content', 'author')
@@ -12,28 +18,32 @@ class CategoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'sub_title', 'created_at', 'updated_at')
     search_fields = ('name', 'sub_title')
 
+
 @admin.register(Thread)
 class ThreadAdmin(admin.ModelAdmin):
     list_display = ('title', 'category', 'views', 'author', 'is_active', 'created_at', 'updated_at')
     search_fields = ('title', 'content')
     readonly_fields = ('likes', 'created_at', 'updated_at') 
     list_filter = ('category', 'is_active')
-    # inlines = [CommentsInline]
+    inlines = [CommentsInline]
+
 
 @admin.register(Comments)
 class CommentsAdmin(admin.ModelAdmin):
     list_display = ('content', 'thread', 'author', 'created_at', 'updated_at')
     search_fields = ('content',)
     list_filter = ('thread', 'author')
-    readonly_fields = ('created_at', 'updated_at', 'replies', 'likes')
+    readonly_fields = ('created_at', 'updated_at', 'likes')
+    inlines = [ReplyInline]
 
-@admin.register(Replies)
-class RepliesAdmin(admin.ModelAdmin):
-    list_display = ('content', 'comment', 'author', 'created_at', 'updated_at')
+
+@admin.register(Reply)
+class ReplyAdmin(admin.ModelAdmin):
+    list_display = ('content', 'comment', 'author', 'parent', 'created_at', 'updated_at')
     search_fields = ('content',)
     list_filter = ('comment', 'author')
-    readonly_fields = ('created_at', 'updated_at')
-    
+    readonly_fields = ('created_at', 'updated_at', 'likes')
+
 
 @admin.register(Like)
 class LikeAdmin(admin.ModelAdmin):

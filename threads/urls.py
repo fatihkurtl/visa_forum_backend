@@ -4,6 +4,7 @@ from . import views
 
 urlpatterns = [
     path('', views.ThreadsView.as_view(), name='thread-list'),
+    path('<int:pk>/', views.ThreadsDetailView.as_view(), name='thread-detail'),
     path('categories/', views.ThreadsCategoriesView.as_view(), name='thread-categories'),
     path('create/', views.ThreadsCreateView.as_view(), name='thread-create'),
 ]

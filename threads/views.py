@@ -1,7 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.pagination import PageNumberPagination
 from members.models import Member, Token
 from members.serializers import MemberTokenSerializer
 from .models import Category, Comments, Thread
@@ -9,19 +8,29 @@ from .serializers import CategorySerializer, ThreadSerializer, ThreadCreateSeria
 
 
 class ThreadsView(APIView):
-    pagination_class = PageNumberPagination
     def get(self, request, format=None):
-        threads = Thread.objects.all().order_by('-created_at')
-        page = self.pagination_class().paginate_queryset(threads, request)
-        if page is not None:
-            serializer = ThreadSerializer(page, many=True)
+        threads = Thread.objects.filter(is_active=True).order_by('-created_at')
+        if threads is not None:
+            serializer = ThreadSerializer(threads, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'message': 'Konu bulunamadı.'}, status=status.HTTP_404_NOT_FOUND)
+    
+
+class ThreadsDetailView(APIView):
+    def get(self, request, pk, format=None):
+        thread = Thread.objects.filter(is_active=True, pk=pk).first()
+        print(thread)
+        if thread is not None:
+            author = Member.objects.get(pk=thread.author.pk)
+            print(author.firstname, author.lastname)
+            serializer = ThreadSerializer(thread)           
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response({'message': 'Konu bulunamadı.'}, status=status.HTTP_404_NOT_FOUND)
     
 
 class ThreadsCategoriesView(APIView):
     def get(self, request, format=None):
-        categories = Category.objects.all()
+        categories = Category.objects.all().order_by('-created_at')
         serializer = CategorySerializer(categories, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
