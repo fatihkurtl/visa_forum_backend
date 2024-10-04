@@ -28,12 +28,12 @@ class Thread(models.Model):
     content = models.TextField(null=False, blank=False, verbose_name='İçerik')
     
     author = models.ForeignKey('members.Member', on_delete=models.CASCADE, verbose_name='Yazar')
-    
     likes = models.ManyToManyField('members.Member', blank=True, through='Like', related_name='thread_likes', verbose_name='Beğeniler')
     views = models.PositiveIntegerField(default=0, verbose_name='Okunma sayısı')
+    
     is_active = models.BooleanField(default=True, verbose_name='Aktif mi?')
     
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name='Kategori')
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='threads_category', verbose_name='Kategori')
     # comments = models.ManyToManyField('members.Member', blank=True, through='Comments', related_name='thread_comments', verbose_name='Yorumlar')
     
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Yayın tarihi')
