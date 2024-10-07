@@ -101,6 +101,3 @@ class Like(models.Model):
         return f"{self.member} liked {self.thread or self.comment or self.reply}"
     
     
-    
-    ###! Likes icin ayri bir model planlanmali her model likes modeline foreignKey ile baglanmali diger modellerde de manyToMany olarak verilmeli
-    ###! her model icin ayri ayri likes modelleri de olusturulabilir karisikligi azaltir ve yonetmesi de kolaylasir.
